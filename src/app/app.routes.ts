@@ -9,7 +9,8 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
-  },  {
+  },
+  {
     path: 'authorization',
     loadComponent: () => import('./authorization/authorization.page').then( m => m.AuthorizationPage)
   },
