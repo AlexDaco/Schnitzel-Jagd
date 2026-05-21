@@ -1,0 +1,25 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-button slot="start" fill="clear">
+      <ion-icon name="chevron-back"></ion-icon>
+    </ion-button>
+    <ion-title>{{ timerDisplay }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <h2>{{ title }}</h2>
+  <p>{{ description }}</p>
+</ion-content>
+
+<ion-footer class="ion-padding">
+  @if (postenAbgeschlossen) {
+  <ion-button expand="block" color="primary" (click)="weiter()">
+    Weiter
+  </ion-button>
+  } @else {
+  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
+    Posten überspringen
+  </ion-button>
+  }
+</ion-footer>
