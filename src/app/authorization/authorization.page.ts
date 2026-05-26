@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter
+  IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter,
+  IonButtons, IonBackButton,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -14,11 +15,12 @@ import { mapOutline, cameraOutline } from 'ionicons/icons';
   imports: [
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter,
-    FormsModule
+    IonButtons, IonBackButton,
+    FormsModule,
   ],
 })
 export class AuthorizationPage {
-  gpsEnabled = true;
+  gpsEnabled = false;
   cameraEnabled = false;
 
   get allAccepted(): boolean {
