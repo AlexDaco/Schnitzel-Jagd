@@ -24,21 +24,21 @@ const POSTEN_DATA = [
   standalone: true,
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar,
-    IonButton, IonFooter,
-    IonButtons, IonBackButton,
+    IonButton, IonIcon, IonFooter, IonList, IonItem, IonLabel,
     CommonModule,
   ],
 })
 export class PostenPage implements OnInit, OnDestroy {
-  title = 'Posten 1';
-  description = 'Begib dich zur Migros Mattenhof. Siehe dein Standort';
-  mapImage = 'assets/map.png';
+  postenList = POSTEN_DATA;
 
   timer = 0;
   timerDisplay = '00:00:00';
   private interval: any;
-
   postenAbgeschlossen = false;
+
+  constructor(private router: Router) {
+    addIcons({ chevronBack });
+  }
 
   ngOnInit(): void {
     this.interval = setInterval(() => {

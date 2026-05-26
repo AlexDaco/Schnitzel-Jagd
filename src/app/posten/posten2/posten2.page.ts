@@ -53,7 +53,7 @@ export class Posten2Page implements OnInit, OnDestroy {
   }
 
   weiter(): void {
-    console.log('Weiter zu Posten 3');
+    this.router.navigate(['/posten3']);
   }
 
   zurueck(): void {
