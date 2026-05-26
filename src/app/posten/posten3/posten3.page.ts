@@ -9,7 +9,7 @@ import { chevronBack, qrCodeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 
-const EXPECTED_QR = 'schnitzel-jagd-posten3'; // dieser Wert muss auf dem QR-Code sein
+const EXPECTED_QR = 'M335@ICT-BZ';
 
 @Component({
   selector: 'app-posten3',
