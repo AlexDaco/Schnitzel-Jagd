@@ -2,11 +2,27 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
-  IonButton, IonIcon, IonFooter
+  IonButton, IonIcon, IonFooter,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronBack } from 'ionicons/icons';
 import { Router } from '@angular/router';
+import { Geolocation } from '@capacitor/geolocation';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { GameService } from '../../services/game.service';
+
+const TARGET_DISTANCE_M = 20;
+const SCHNITZEL_THRESHOLD_S = 30;
+
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 @Component({
   selector: 'app-posten2',
@@ -15,41 +31,100 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar,
-    IonButton, IonIcon, IonFooter, CommonModule
-  ]
+    IonButton, IonIcon, IonFooter, CommonModule,
+  ],
 })
 export class Posten2Page implements OnInit, OnDestroy {
-  title = 'Posten 2';
-  description = 'Wie weit ist die Distanz von 20 Meter';
-
   timer = 0;
-  timerDisplay = '00:00:00';
-  private interval: any;
+  timerDisplay = '00:00';
+  zurueckgelegtMeters: number = 0;
+  restMeters: number = TARGET_DISTANCE_M;
   postenAbgeschlossen = false;
+  ergebnisText = '';
+  hatSchnitzel = false;
 
-  constructor(private router: Router) {
+  private intervalId: any;
+  private watchId: string | null = null;
+  startLat: number | null = null;
+  private startLng: number | null = null;
+
+  constructor(private router: Router, private gameService: GameService) {
     addIcons({ chevronBack });
   }
 
   ngOnInit(): void {
-    this.interval = setInterval(() => {
+    this.intervalId = setInterval(() => {
       this.timer++;
-      const h = Math.floor(this.timer / 3600);
-      const m = Math.floor((this.timer % 3600) / 60);
+      const m = Math.floor(this.timer / 60);
       const s = this.timer % 60;
-      this.timerDisplay =
-        String(h).padStart(2, '0') + ':' +
-        String(m).padStart(2, '0') + ':' +
-        String(s).padStart(2, '0');
+      this.timerDisplay = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
+
+    this.startGps();
   }
 
   ngOnDestroy(): void {
-    clearInterval(this.interval);
+    clearInterval(this.intervalId);
+    if (this.watchId !== null) {
+      Geolocation.clearWatch({ id: this.watchId });
+    }
+  }
+
+  private async startGps(): Promise<void> {
+    try {
+      this.watchId = await Geolocation.watchPosition(
+        { enableHighAccuracy: true },
+        (position, err) => {
+          if (err || !position) return;
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          if (this.startLat === null) {
+            this.startLat = lat;
+            this.startLng = lng;
+            return;
+          }
+
+          const moved = haversineMeters(this.startLat!, this.startLng!, lat, lng);
+          this.zurueckgelegtMeters = Math.round(moved);
+          this.restMeters = Math.max(0, TARGET_DISTANCE_M - this.zurueckgelegtMeters);
+
+          if (moved >= TARGET_DISTANCE_M && !this.postenAbgeschlossen) {
+            this.abschliessen();
+          }
+        },
+      );
+    } catch {
+      // GPS unavailable
+    }
+  }
+
+  private abschliessen(): void {
+    clearInterval(this.intervalId);
+    if (this.watchId !== null) {
+      Geolocation.clearWatch({ id: this.watchId });
+      this.watchId = null;
+    }
+    this.postenAbgeschlossen = true;
+    this.restMeters = 0;
+    const schnitzel = this.timer <= SCHNITZEL_THRESHOLD_S ? 1 : 0;
+    const kartoffel = schnitzel === 1 ? 0 : 1;
+    this.hatSchnitzel = schnitzel === 1;
+    this.ergebnisText = schnitzel === 1
+      ? `🥩 Schnitzel! 20m in ${this.timer}s!`
+      : `🥔 Kartoffel! Du hast ${this.timer}s gebraucht.`;
+    this.gameService.recordResult(2, { schnitzel, kartoffel, skipped: false, timeSeconds: this.timer });
+    Haptics.impact({ style: ImpactStyle.Medium });
   }
 
   postenUeberspringen(): void {
-    this.postenAbgeschlossen = true;
+    clearInterval(this.intervalId);
+    if (this.watchId !== null) {
+      Geolocation.clearWatch({ id: this.watchId });
+      this.watchId = null;
+    }
+    this.gameService.recordResult(2, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.router.navigate(['/posten']);
   }
 
   weiter(): void {

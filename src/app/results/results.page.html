@@ -1,0 +1,40 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Ergebnis</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding" style="text-align: center;">
+  <div class="rank-badge">{{ rankEmoji }}</div>
+
+  <h1 class="player-name">{{ playerName }}</h1>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ totalSchnitzel }}</div>
+      <div class="stat-label">🥩 Schnitzel</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ totalKartoffel }}</div>
+      <div class="stat-label">🥔 Kartoffeln</div>
+    </div>
+  </div>
+
+  <div class="time-card">
+    <div class="time-label">⏱ Gesamtzeit</div>
+    <div class="time-value">{{ dauerDisplay }}</div>
+  </div>
+
+  <div class="rank-text">Platz {{ rank }} im Leaderboard</div>
+
+  <p class="thanks">
+    Danke fürs Mitmachen! 🎉<br>
+    Du hast die Schnitzeljagd gemeistert.
+  </p>
+</ion-content>
+
+<ion-footer class="ion-padding">
+  <ion-button expand="block" color="primary" (click)="zuLeaderboard()">
+    Zum Leaderboard
+  </ion-button>
+</ion-footer>

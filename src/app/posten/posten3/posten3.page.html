@@ -3,38 +3,50 @@
     <ion-button slot="start" fill="clear" (click)="zurueck()">
       <ion-icon name="chevron-back"></ion-icon>
     </ion-button>
-    <ion-title>{{ timerDisplay }}</ion-title>
+    <ion-title>Posten 3</ion-title>
+    <span slot="end" class="header-timer">{{ timerDisplay }}</span>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <h2>{{ title }}</h2>
-  <p>{{ description }}</p>
+<ion-content [fullscreen]="true" class="ion-padding" style="text-align: center;">
+  <h2>📷 QR-Code scannen</h2>
+  <p style="color: var(--ion-color-medium);">
+    Gehe zur Kursraumtür und scanne den QR-Code an der Tür.
+  </p>
+  <p style="font-size: 0.85rem; color: var(--ion-color-medium);">
+    Unter 1 Minute = 🥩 Schnitzel
+  </p>
 
   @if (!postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="qrScannen()">
-    <ion-icon name="qr-code-outline" slot="start"></ion-icon>
-    QR-Code scannen
-  </ion-button>
+    <ion-button expand="block" color="primary" style="margin-top: 24px;"
+                [disabled]="moduleLaden" (click)="qrScannen()">
+      @if (moduleLaden) {
+        <ion-spinner name="crescent" slot="start"></ion-spinner>
+        Modul wird installiert…
+      } @else {
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        QR-Code scannen
+      }
+    </ion-button>
   }
 
   @if (scanFehler) {
-  <p style="color: red; margin-top: 1rem;">{{ scanFehler }}</p>
+    <p style="color: var(--ion-color-danger); margin-top: 16px; font-weight: 600;">{{ scanFehler }}</p>
   }
 
   @if (postenAbgeschlossen) {
-  <p style="color: green; margin-top: 1rem;">✓ QR-Code erfolgreich gescannt!</p>
+    <div class="result-box" [class.schnitzel]="hatSchnitzel" [class.kartoffel]="!hatSchnitzel">
+      {{ ergebnisText }}
+    </div>
   }
 </ion-content>
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="weiter()">
-    Weiter
-  </ion-button>
+    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
   } @else {
-  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-    Posten überspringen
-  </ion-button>
+    <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
+      Posten überspringen
+    </ion-button>
   }
 </ion-footer>

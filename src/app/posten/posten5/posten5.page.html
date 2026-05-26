@@ -3,13 +3,19 @@
     <ion-button slot="start" fill="clear" (click)="zurueck()">
       <ion-icon name="chevron-back"></ion-icon>
     </ion-button>
-    <ion-title>{{ timerDisplay }}</ion-title>
+    <ion-title>Posten 5</ion-title>
+    <span slot="end" class="header-timer">{{ timerDisplay }}</span>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <h2>{{ title }}</h2>
-  <p>{{ description }}</p>
+  <h2>⚡ Ladekabel Challenge</h2>
+  <p style="color: var(--ion-color-medium);">
+    Stecke das Kabel an und entferne es wieder.
+  </p>
+  <p style="font-size: 0.85rem; color: var(--ion-color-medium);">
+    Unter 5 Sekunden (Kabel verbinden & trennen) = 🥩 Schnitzel
+  </p>
 
   <div class="progress-section">
     <ion-progress-bar [value]="progress"></ion-progress-bar>
@@ -18,8 +24,7 @@
       @for (step of steps; track step.id) {
         <li
           [class.done]="currentStep > step.id"
-          [class.active]="currentStep === step.id"
-        >
+          [class.active]="currentStep === step.id">
           <span class="step-marker">
             @if (currentStep > step.id) { ✓ } @else { {{ step.id }} }
           </span>
@@ -29,19 +34,19 @@
     </ul>
 
     @if (postenAbgeschlossen) {
-      <p class="success">Posten abgeschlossen!</p>
+      <div class="result-box" [class.schnitzel]="hatSchnitzel" [class.kartoffel]="!hatSchnitzel">
+        {{ ergebnisText }}
+      </div>
     }
   </div>
 </ion-content>
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="weiter()">
-    Weiter
-  </ion-button>
+    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
   } @else {
-  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-    Posten überspringen
-  </ion-button>
+    <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
+      Posten überspringen
+    </ion-button>
   }
 </ion-footer>

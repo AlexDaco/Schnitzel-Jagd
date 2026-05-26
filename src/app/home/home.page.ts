@@ -11,6 +11,8 @@ import {
 import { LeaderboardEntry } from '../models/leaderboard-entry';
 import { LeaderboardService } from '../services/leaderboard.service';
 import { PlayerService } from '../services/player.service';
+import { GameService } from '../services/game.service';
+import { TimerService } from '../services/timer.service';
 
 
 @Component({
@@ -28,6 +30,8 @@ import { PlayerService } from '../services/player.service';
 export class HomePage implements OnInit {
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly playerService      = inject(PlayerService);
+  private readonly gameService        = inject(GameService);
+  private readonly timerService       = inject(TimerService);
   private readonly alertCtrl          = inject(AlertController);
   private readonly toastCtrl          = inject(ToastController);
   private readonly router             = inject(Router);
@@ -35,6 +39,10 @@ export class HomePage implements OnInit {
   entries: LeaderboardEntry[] = [];
 
   ngOnInit(): void {
+    this.loadEntries();
+  }
+
+  ionViewWillEnter(): void {
     this.loadEntries();
   }
   formatDauer(sekunden: number): string {
@@ -77,6 +85,8 @@ export class HomePage implements OnInit {
               return false;
             }
 
+            this.gameService.startNewGame();
+            this.timerService.reset();
             this.playerService.setPlayerName(name);
             this.router.navigate(['/authorization']);
             return true;

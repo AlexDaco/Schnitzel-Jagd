@@ -1,8 +1,5 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-button slot="start" fill="clear" (click)="schnitzeljagdBeenden()">
-      <ion-icon name="chevron-back"></ion-icon>
-    </ion-button>
     <ion-title>Posten Übersicht</ion-title>
     <span slot="end" class="header-timer">{{ timerDisplay() }}</span>
   </ion-toolbar>
@@ -11,19 +8,33 @@
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-list>
     @for (posten of postenList; track posten.id) {
-    <ion-item button (click)="openPosten(posten.id)" lines="full">
-      <ion-label>
-        <h3>{{ posten.title }}</h3>
-        <p>{{ posten.description }}</p>
-      </ion-label>
-      <span slot="end" style="font-size: 1.5rem;">{{ posten.icon }}</span>
-    </ion-item>
+      <ion-item button (click)="openPosten(posten.id)" lines="full"
+                [class.posten-done]="isPostenDone(posten.id)">
+        <ion-label>
+          <h3>{{ posten.title }}</h3>
+          <p>{{ posten.description }}</p>
+        </ion-label>
+        <span slot="end" style="font-size: 1.4rem; margin-left: 8px;">
+          @if (isPostenDone(posten.id)) {
+            {{ getPostenIcon(posten.id) }}
+          } @else {
+            {{ posten.icon }}
+          }
+        </span>
+      </ion-item>
     }
   </ion-list>
 </ion-content>
 
 <ion-footer class="ion-padding">
-  <ion-button expand="block" color="danger" (click)="schnitzeljagdBeenden()">
-    Schnitzeljagd Beenden
+  <ion-button
+    expand="block"
+    [color]="allesDone ? 'success' : 'danger'"
+    (click)="schnitzeljagdBeenden()">
+    @if (allesDone) {
+      Schnitzeljagd Abschliessen 🏆
+    } @else {
+      Schnitzeljagd Beenden
+    }
   </ion-button>
 </ion-footer>

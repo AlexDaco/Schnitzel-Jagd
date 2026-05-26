@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  leaderboardApiUrl: 'https://jsonplaceholder.typicode.com/posts',
 };

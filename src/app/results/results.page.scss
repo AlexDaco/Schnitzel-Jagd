@@ -1,0 +1,74 @@
+.rank-badge {
+  font-size: 5rem;
+  margin: 24px 0 8px;
+  line-height: 1;
+}
+
+.player-name {
+  font-size: 2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 24px;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  flex: 1;
+  max-width: 140px;
+  border: 2px solid var(--ion-color-medium-tint);
+  border-radius: 12px;
+  padding: 16px 8px;
+}
+
+.stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--ion-color-dark);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  margin-top: 6px;
+}
+
+.time-card {
+  border: 2px solid var(--ion-color-primary-tint);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0 auto 16px;
+  max-width: 300px;
+}
+
+.time-label {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.time-value {
+  font-size: 2.5rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.rank-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+  margin-bottom: 20px;
+}
+
+.thanks {
+  font-size: 1rem;
+  color: var(--ion-color-medium);
+  line-height: 1.6;
+}

@@ -3,23 +3,41 @@
     <ion-button slot="start" fill="clear" (click)="zurueck()">
       <ion-icon name="chevron-back"></ion-icon>
     </ion-button>
-    <ion-title>{{ timerDisplay }}</ion-title>
+    <ion-title>Posten 1</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <h2>{{ title }}</h2>
-  <p>{{ description }}</p>
+<ion-content [fullscreen]="true" class="ion-padding" style="text-align: center;">
+  <h2>📍 Gehe zur Migro</h2>
+
+  <div class="timer-box">
+    <div class="timer-label">⏱ Zeit</div>
+    <div class="timer-value">{{ timerDisplay }}</div>
+    <div class="timer-hint">Unter 2 Minuten = 🥩 Schnitzel</div>
+  </div>
+
+  <div class="dist-box">
+    @if (distanzMeters !== null) {
+      <div class="dist-value">{{ distanzMeters }} m</div>
+      <div class="dist-label">bis zum Ziel</div>
+    } @else {
+      <div class="dist-label">GPS wird geladen…</div>
+    }
+  </div>
+
+  @if (postenAbgeschlossen) {
+    <div class="result-box" [class.schnitzel]="hatSchnitzel" [class.kartoffel]="!hatSchnitzel">
+      {{ ergebnisText }}
+    </div>
+  }
 </ion-content>
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="weiter()">
-    Weiter
-  </ion-button>
+    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
   } @else {
-  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-    Posten überspringen
-  </ion-button>
+    <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
+      Posten überspringen
+    </ion-button>
   }
 </ion-footer>

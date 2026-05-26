@@ -1,6 +1,12 @@
 .header-timer {
+  font-family: 'Courier New', monospace;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
   padding-right: 16px;
   opacity: 0.9;
+}
+
+.posten-done {
+  --background: var(--ion-color-light-tint);
+  opacity: 0.75;
 }

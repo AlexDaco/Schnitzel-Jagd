@@ -1,0 +1,18 @@
+.header-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  padding-right: 16px;
+  color: var(--ion-color-primary);
+}
+
+.result-box {
+  margin: 20px auto;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  max-width: 300px;
+}
+
+.result-box.schnitzel { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+.result-box.kartoffel { background: #fff3cd; color: #856404; border: 2px solid #ffc107; }

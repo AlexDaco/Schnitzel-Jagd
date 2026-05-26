@@ -22,12 +22,15 @@ export class TimerService {
     }, 1000);
   }
 
+  finalElapsed: number | null = null;
+
   stop(): number {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
     const final = this.elapsed();
+    this.finalElapsed = final;
     return final;
   }
 
@@ -37,6 +40,7 @@ export class TimerService {
       this.intervalId = null;
     }
     this.startTime = null;
+    this.finalElapsed = null;
     this.elapsed.set(0);
   }
 

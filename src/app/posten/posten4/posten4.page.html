@@ -3,40 +3,41 @@
     <ion-button slot="start" fill="clear" (click)="zurueck()">
       <ion-icon name="chevron-back"></ion-icon>
     </ion-button>
-    <ion-title>{{ timerDisplay }}</ion-title>
+    <ion-title>Posten 4</ion-title>
+    <span slot="end" class="header-timer">{{ timerDisplay }}</span>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding" style="text-align: center;">
-  <h2>{{ title }}</h2>
-  <p>{{ description }}</p>
+  <h2>📱 Dreh dein Handy!</h2>
+  <p style="color: var(--ion-color-medium);">
+    Halte dein Smartphone auf den Kopf (180°)
+  </p>
+  <p style="font-size: 0.85rem; color: var(--ion-color-medium);">
+    Unter 10 Sekunden = 🥩 Schnitzel
+  </p>
 
-  <div style="font-size: 5rem; margin-top: 2rem;">
-    🔄
+  <div style="font-size: 5rem; margin: 24px 0;">🔄</div>
+
+  <p style="font-size: 2.5rem; font-weight: 800; margin: 0;">{{ fortschritt }}%</p>
+
+  <div class="progress-track">
+    <div class="progress-fill" [style.width]="fortschritt + '%'"></div>
   </div>
 
-  <div style="margin-top: 2rem;">
-    <p style="font-size: 2rem; font-weight: bold;">{{ fortschritt }}%</p>
-    <div style="background: #e0e0e0; border-radius: 8px; height: 20px; overflow: hidden;">
-      <div [style.width]="fortschritt + '%'"
-           style="background: #3880ff; height: 100%; transition: width 0.2s;">
-      </div>
+  @if (postenAbgeschlossen) {
+    <div class="result-box" [class.schnitzel]="hatSchnitzel" [class.kartoffel]="!hatSchnitzel">
+      {{ ergebnisText }}
     </div>
-  </div>
-
-  @if (postenAbgeschlossen && istKopfueber) {
-  <p style="color: green; margin-top: 1rem;">✓ Handy erfolgreich kopfüber gehalten!</p>
   }
 </ion-content>
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="weiter()">
-    Weiter
-  </ion-button>
+    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
   } @else {
-  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-    Posten überspringen
-  </ion-button>
+    <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
+      Posten überspringen
+    </ion-button>
   }
 </ion-footer>

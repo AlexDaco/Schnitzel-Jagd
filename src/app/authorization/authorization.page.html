@@ -1,33 +1,65 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-button fill="clear" (click)="zurueck()">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Berechtigung Akzeptieren</ion-title>
+    <ion-title>Berechtigungen</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <ion-list lines="none">
-    <ion-item>
-      <ion-icon name="map-outline" slot="start" size="large"></ion-icon>
+  <ion-list lines="full">
+
+    <ion-item [class.item-granted]="gpsEnabled">
+      <ion-icon name="map-outline" slot="start" size="large"
+                [color]="gpsEnabled ? 'success' : 'medium'"></ion-icon>
       <ion-label>GPS</ion-label>
-      <ion-toggle
-        [(ngModel)]="gpsEnabled"
-        (ionChange)="onGpsToggle()"
-        slot="end">
-      </ion-toggle>
+      <div slot="end" class="toggle-wrap">
+        @if (gpsEnabled) {
+          <span class="granted-badge">✓</span>
+        }
+        <ion-toggle
+          [(ngModel)]="gpsEnabled"
+          (ionChange)="onGpsToggle()"
+          [disabled]="gpsEnabled">
+        </ion-toggle>
+      </div>
     </ion-item>
 
-    <ion-item>
-      <ion-icon name="camera-outline" slot="start" size="large"></ion-icon>
+    <ion-item [class.item-granted]="cameraEnabled">
+      <ion-icon name="camera-outline" slot="start" size="large"
+                [color]="cameraEnabled ? 'success' : 'medium'"></ion-icon>
       <ion-label>Kamera</ion-label>
-      <ion-toggle
-        [(ngModel)]="cameraEnabled"
-        (ionChange)="onCameraToggle()"
-        slot="end">
-      </ion-toggle>
+      <div slot="end" class="toggle-wrap">
+        @if (cameraEnabled) {
+          <span class="granted-badge">✓</span>
+        }
+        <ion-toggle
+          [(ngModel)]="cameraEnabled"
+          (ionChange)="onCameraToggle()"
+          [disabled]="cameraEnabled">
+        </ion-toggle>
+      </div>
     </ion-item>
+
+    <ion-item [class.item-granted]="motionEnabled">
+      <ion-icon name="phone-portrait-outline" slot="start" size="large"
+                [color]="motionEnabled ? 'success' : 'medium'"></ion-icon>
+      <ion-label>Bewegungssensor</ion-label>
+      <div slot="end" class="toggle-wrap">
+        @if (motionEnabled) {
+          <span class="granted-badge">✓</span>
+        }
+        <ion-toggle
+          [(ngModel)]="motionEnabled"
+          (ionChange)="onMotionToggle()"
+          [disabled]="motionEnabled">
+        </ion-toggle>
+      </div>
+    </ion-item>
+
   </ion-list>
 </ion-content>
 
@@ -35,8 +67,12 @@
   <ion-button
     expand="block"
     [disabled]="!allAccepted"
-    [color]="allAccepted ? 'primary' : 'medium'"
+    [color]="allAccepted ? 'success' : 'medium'"
     (click)="weiter()">
-    Weiter
+    @if (allAccepted) {
+      Los geht's! 🥩
+    } @else {
+      Bitte alle Berechtigungen erteilen
+    }
   </ion-button>
 </ion-footer>
