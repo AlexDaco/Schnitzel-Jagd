@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter
+  IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter,
+  IonButtons, IonBackButton,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
@@ -17,11 +19,14 @@ import { Router } from '@angular/router';
   imports: [
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter,
-    FormsModule
+    IonButtons, IonBackButton,
+    FormsModule,
   ],
 })
 export class AuthorizationPage {
-  gpsEnabled = false;
+  private readonly router = inject(Router);
+
+  gpsEnabled = true;
   cameraEnabled = false;
 
   get allAccepted(): boolean {

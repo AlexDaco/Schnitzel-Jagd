@@ -1,7 +1,3 @@
-/**
- * Ein Eintrag im Leaderboard.
- * Repräsentiert einen abgeschlossenen Schnitzeljagd-Durchlauf eines Spielers.
- */
 export interface LeaderboardEntry {
   id: number;
 
