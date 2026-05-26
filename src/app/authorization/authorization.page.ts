@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
@@ -10,7 +10,6 @@ import { addIcons } from 'ionicons';
 import { mapOutline, cameraOutline } from 'ionicons/icons';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera } from '@capacitor/camera';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-authorization',
@@ -24,9 +23,7 @@ import { Router } from '@angular/router';
   ],
 })
 export class AuthorizationPage {
-  private readonly router = inject(Router);
-
-  gpsEnabled = true;
+  gpsEnabled = false;
   cameraEnabled = false;
 
   get allAccepted(): boolean {
