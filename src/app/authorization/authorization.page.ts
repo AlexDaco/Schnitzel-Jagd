@@ -6,6 +6,9 @@ import {
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import { mapOutline, cameraOutline } from 'ionicons/icons';
+import { Geolocation } from '@capacitor/geolocation';
+import { Camera } from '@capacitor/camera';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-authorization',
@@ -25,13 +28,27 @@ export class AuthorizationPage {
     return this.gpsEnabled && this.cameraEnabled;
   }
 
-  constructor() {
+  constructor(private router: Router) {
     addIcons({ mapOutline, cameraOutline });
+  }
+
+  async onGpsToggle(): Promise<void> {
+    if (this.gpsEnabled) {
+      const permission = await Geolocation.requestPermissions();
+      this.gpsEnabled = permission.location === 'granted';
+    }
+  }
+
+  async onCameraToggle(): Promise<void> {
+    if (this.cameraEnabled) {
+      const permission = await Camera.requestPermissions({ permissions: ['camera'] });
+      this.cameraEnabled = permission.camera === 'granted';
+    }
   }
 
   weiter(): void {
     if (this.allAccepted) {
-      console.log('Weiter...');
+      this.router.navigate(['/posten']);
     }
   }
 }
