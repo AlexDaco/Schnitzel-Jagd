@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter,
@@ -20,7 +21,9 @@ import { mapOutline, cameraOutline } from 'ionicons/icons';
   ],
 })
 export class AuthorizationPage {
-  gpsEnabled = false;
+  private readonly router = inject(Router);
+
+  gpsEnabled = true;
   cameraEnabled = false;
 
   get allAccepted(): boolean {
@@ -31,9 +34,10 @@ export class AuthorizationPage {
     addIcons({ mapOutline, cameraOutline });
   }
 
+
   weiter(): void {
     if (this.allAccepted) {
-      console.log('Weiter...');
+      this.router.navigate(['/posten']);
     }
   }
 }
