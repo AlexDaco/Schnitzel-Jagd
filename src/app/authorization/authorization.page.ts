@@ -42,7 +42,6 @@ export class AuthorizationPage {
       return;
     }
     const permission = await Geolocation.requestPermissions();
-    console.log('GPS Permission:', permission);
     this.gpsEnabled =
       permission.location === 'granted' || permission.coarseLocation === 'granted';
     if (this.gpsEnabled) {
@@ -54,8 +53,10 @@ export class AuthorizationPage {
     if (!this.cameraEnabled) {
       return;
     }
-    const permission = await Camera.requestPermissions({ permissions: ['camera'] });
-    this.cameraEnabled = permission.camera === 'granted';
+    const permission = await Camera.requestPermissions({
+      permissions: ['camera', 'photos']
+    });
+    this.cameraEnabled = permission.camera === 'granted' || permission.photos === 'granted';
     if (this.cameraEnabled) {
       await Haptics.impact({ style: ImpactStyle.Heavy });
     }
