@@ -10,6 +10,28 @@
 <ion-content [fullscreen]="true" class="ion-padding">
   <h2>{{ title }}</h2>
   <p>{{ description }}</p>
+
+  <div class="progress-section">
+    <ion-progress-bar [value]="progress"></ion-progress-bar>
+
+    <ul class="step-list">
+      @for (step of steps; track step.id) {
+        <li
+          [class.done]="currentStep > step.id"
+          [class.active]="currentStep === step.id"
+        >
+          <span class="step-marker">
+            @if (currentStep > step.id) { ✓ } @else { {{ step.id }} }
+          </span>
+          <span class="step-label">{{ step.label }}</span>
+        </li>
+      }
+    </ul>
+
+    @if (postenAbgeschlossen) {
+      <p class="success">Posten abgeschlossen!</p>
+    }
+  </div>
 </ion-content>
 
 <ion-footer class="ion-padding">

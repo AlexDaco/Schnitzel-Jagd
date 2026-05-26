@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
@@ -7,6 +7,7 @@ import {
 import { addIcons } from 'ionicons';
 import { chevronBack } from 'ionicons/icons';
 import { Router } from '@angular/router';
+import { TimerService } from '../services/timer.service';
 
 const POSTEN_DATA = [
   { id: 1, title: 'Posten 1', description: 'Begib dich zur Migros Mattenhof', icon: '🛒' },
@@ -28,33 +29,22 @@ const POSTEN_DATA = [
     CommonModule,
   ],
 })
-export class PostenPage implements OnInit, OnDestroy {
+export class PostenPage implements OnInit {
+  private readonly timerService = inject(TimerService);
+  private readonly router = inject(Router);
+
   postenList = POSTEN_DATA;
 
-  timer = 0;
-  timerDisplay = '00:00:00';
-  private interval: any;
-  postenAbgeschlossen = false;
+  readonly timerDisplay = computed(() =>
+    this.timerService.format(this.timerService.elapsed()),
+  );
 
-  constructor(private router: Router) {
+  constructor() {
     addIcons({ chevronBack });
   }
 
   ngOnInit(): void {
-    this.interval = setInterval(() => {
-      this.timer++;
-      const h = Math.floor(this.timer / 3600);
-      const m = Math.floor((this.timer % 3600) / 60);
-      const s = this.timer % 60;
-      this.timerDisplay =
-        String(h).padStart(2, '0') + ':' +
-        String(m).padStart(2, '0') + ':' +
-        String(s).padStart(2, '0');
-    }, 1000);
-  }
-
-  ngOnDestroy(): void {
-    clearInterval(this.interval);
+    this.timerService.start();
   }
 
   openPosten(id: number): void {
@@ -62,6 +52,7 @@ export class PostenPage implements OnInit, OnDestroy {
   }
 
   schnitzeljagdBeenden(): void {
+    this.timerService.stop();
     this.router.navigate(['/home']);
   }
 }
