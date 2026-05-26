@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
   IonButton, IonIcon, IonFooter
@@ -20,6 +21,8 @@ import { Router } from '@angular/router';
   ],
 })
 export class Posten1Page implements OnInit, OnDestroy {
+  private readonly router = inject(Router);
+
   title = 'Posten 1';
   description = 'Begib dich zur Migros Mattenhof. Siehe dein Standort';
 
