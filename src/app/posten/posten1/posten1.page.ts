@@ -6,6 +6,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronBack } from 'ionicons/icons';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-posten1',
@@ -26,7 +27,7 @@ export class Posten1Page implements OnInit, OnDestroy {
   private interval: any;
   postenAbgeschlossen = false;
 
-  constructor() {
+  constructor(private router: Router) {
     addIcons({ chevronBack });
   }
 
@@ -52,6 +53,10 @@ export class Posten1Page implements OnInit, OnDestroy {
   }
 
   weiter(): void {
-    console.log('Weiter zu Posten 2');
+    this.router.navigate(['/posten2']);
+  }
+
+  zurueck(): void {
+    this.router.navigate(['/posten']);
   }
 }
