@@ -10,6 +10,21 @@
 <ion-content [fullscreen]="true" class="ion-padding">
   <h2>{{ title }}</h2>
   <p>{{ description }}</p>
+
+  @if (!postenAbgeschlossen) {
+  <ion-button expand="block" color="primary" (click)="qrScannen()">
+    <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+    QR-Code scannen
+  </ion-button>
+  }
+
+  @if (scanFehler) {
+  <p style="color: red; margin-top: 1rem;">{{ scanFehler }}</p>
+  }
+
+  @if (postenAbgeschlossen) {
+  <p style="color: green; margin-top: 1rem;">✓ QR-Code erfolgreich gescannt!</p>
+  }
 </ion-content>
 
 <ion-footer class="ion-padding">

@@ -5,8 +5,11 @@ import {
   IonButton, IonIcon, IonFooter
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { chevronBack } from 'ionicons/icons';
+import { chevronBack, qrCodeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
+import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
+
+const EXPECTED_QR = 'schnitzel-jagd-posten3'; // dieser Wert muss auf dem QR-Code sein
 
 @Component({
   selector: 'app-posten3',
@@ -20,14 +23,15 @@ import { Router } from '@angular/router';
 })
 export class Posten3Page implements OnInit, OnDestroy {
   title = 'Posten 3';
-  description = 'Gehe zur Tür des Kursraum und scanne den QR code Der QR Code hängt an der Türe vor dem reingehen.';
+  description = 'Gehe zur Tür des Kursraum und scanne den QR code. Der QR Code hängt an der Türe vor dem reingehen.';
   timer = 0;
   timerDisplay = '00:00:00';
   private interval: any;
   postenAbgeschlossen = false;
+  scanFehler = '';
 
   constructor(private router: Router) {
-    addIcons({ chevronBack });
+    addIcons({ chevronBack, qrCodeOutline });
   }
 
   ngOnInit(): void {
@@ -45,6 +49,23 @@ export class Posten3Page implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.interval);
+  }
+
+  async qrScannen(): Promise<void> {
+    this.scanFehler = '';
+    try {
+      const { barcodes } = await BarcodeScanner.scan();
+      if (barcodes.length > 0) {
+        const wert = barcodes[0].rawValue;
+        if (wert === EXPECTED_QR) {
+          this.postenAbgeschlossen = true;
+        } else {
+          this.scanFehler = 'Falscher QR-Code. Bitte den richtigen scannen.';
+        }
+      }
+    } catch (e) {
+      this.scanFehler = 'Kamera konnte nicht geöffnet werden.';
+    }
   }
 
   postenUeberspringen(): void {
