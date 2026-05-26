@@ -1,0 +1,64 @@
+.progress-section {
+  margin-top: 24px;
+
+  ion-progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    --progress-background: var(--ion-color-primary, #3880ff);
+  }
+
+  .step-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 0 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      opacity: 0.5;
+      transition: opacity 0.2s ease;
+
+      &.active {
+        opacity: 1;
+        font-weight: 600;
+      }
+
+      &.done {
+        opacity: 0.8;
+
+        .step-marker {
+          background: var(--ion-color-success, #2dd36f);
+          color: #fff;
+          border-color: var(--ion-color-success, #2dd36f);
+        }
+      }
+    }
+
+    .step-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--ion-color-medium, #92949c);
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    li.active .step-marker {
+      border-color: var(--ion-color-primary, #3880ff);
+      color: var(--ion-color-primary, #3880ff);
+    }
+  }
+
+  .success {
+    margin-top: 16px;
+    color: var(--ion-color-success, #2dd36f);
+    font-weight: 600;
+    text-align: center;
+  }
+}
