@@ -3,25 +3,25 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/authorization"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ timerDisplay }}</ion-title>
+    <ion-title>Posten Übersicht</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <h2>{{ title }}</h2>
-  <p>{{ description }}</p>
-
-  <img [src]="mapImage" alt="Karte" style="width: 100%; border-radius: 8px;" />
+  <ion-list lines="full">
+    @for (item of posten; track item.id) {
+      <ion-item button (click)="openPosten(item.id)">
+        <ion-label>
+          <h2>{{ item.icon }} {{ item.title }}</h2>
+          <p>{{ item.description }}</p>
+        </ion-label>
+      </ion-item>
+    }
+  </ion-list>
 </ion-content>
 
 <ion-footer class="ion-padding">
-  @if (postenAbgeschlossen) {
-    <ion-button expand="block" color="primary" (click)="weiter()">
-      Weiter
-    </ion-button>
-  } @else {
-    <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-      Posten überspringen
-    </ion-button>
-  }
+  <ion-button expand="block" color="danger" (click)="schnitzeljagdBeenden()">
+    Schnitzeljagd beenden
+  </ion-button>
 </ion-footer>

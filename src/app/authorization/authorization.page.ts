@@ -10,6 +10,7 @@ import { addIcons } from 'ionicons';
 import { mapOutline, cameraOutline } from 'ionicons/icons';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera } from '@capacitor/camera';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 @Component({
   selector: 'app-authorization',
@@ -41,7 +42,12 @@ export class AuthorizationPage {
       return;
     }
     const permission = await Geolocation.requestPermissions();
-    this.gpsEnabled = permission.location === 'granted';
+    console.log('GPS Permission:', permission);
+    this.gpsEnabled =
+      permission.location === 'granted' || permission.coarseLocation === 'granted';
+    if (this.gpsEnabled) {
+      await Haptics.impact({ style: ImpactStyle.Heavy });
+    }
   }
 
   async onCameraToggle(): Promise<void> {
@@ -50,11 +56,14 @@ export class AuthorizationPage {
     }
     const permission = await Camera.requestPermissions({ permissions: ['camera'] });
     this.cameraEnabled = permission.camera === 'granted';
+    if (this.cameraEnabled) {
+      await Haptics.impact({ style: ImpactStyle.Heavy });
+    }
   }
 
   weiter(): void {
     if (this.allAccepted) {
-      this.router.navigate(['/stations']);
+      this.router.navigate(['/posten']);
     }
   }
 }

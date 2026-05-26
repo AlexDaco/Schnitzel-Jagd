@@ -12,11 +12,6 @@ export const routes: Routes = [
       import('./authorization/authorization.page').then(m => m.AuthorizationPage),
   },
   {
-    path: 'stations',
-    loadComponent: () =>
-      import('./stations/stations.page').then(m => m.StationsPage),
-  },
-  {
     path: 'posten',
     loadComponent: () =>
       import('./posten/posten.page').then(m => m.PostenPage),
