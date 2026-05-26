@@ -1,0 +1,78 @@
+:host {
+  --page-bg: #f5f5f7;
+  --card-bg: #ffffff;
+  --title-color: #1a1a1a;
+  --text-color: #444444;
+  --border-color: #e2e2e6;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stations-content {
+  --background: var(--page-bg);
+}
+
+.stations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.station-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.station-card {
+  margin: 0;
+  background: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.station-header {
+  padding: 14px 16px 8px;
+  text-align: center;
+}
+
+.station-title {
+  color: var(--title-color);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.station-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 12px;
+  padding: 8px 16px 16px;
+}
+
+.station-text {
+  color: var(--text-color);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  text-align: left;
+  align-self: end;
+}
+
+.station-image {
+  justify-self: end;
+  align-self: end;
+
+  img {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+  }
+}

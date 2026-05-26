@@ -9,9 +9,10 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
-  },  {
-    path: 'stations',
-    loadComponent: () => import('./stations/stations.page').then( m => m.StationsPage)
   },
-
+  {
+    path: 'stations',
+    loadComponent: () =>
+      import('./stations/stations.page').then((m) => m.StationsPage),
+  },
 ];
