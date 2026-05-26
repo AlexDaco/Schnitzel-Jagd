@@ -11,11 +11,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./authorization/authorization.page').then(m => m.AuthorizationPage),
   },
-  {
-    path: 'stations',
-    loadComponent: () =>
-      import('./stations/stations.page').then(m => m.StationsPage),
-  },
+
   {
     path: 'posten',
     loadComponent: () =>
