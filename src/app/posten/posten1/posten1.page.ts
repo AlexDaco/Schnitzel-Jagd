@@ -2,9 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
-  IonButton, IonFooter,
-  IonButtons, IonBackButton,
+  IonButton, IonIcon, IonFooter
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { chevronBack } from 'ionicons/icons';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-posten1',
@@ -13,8 +15,7 @@ import {
   standalone: true,
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar,
-    IonButton, IonFooter,
-    IonButtons, IonBackButton,
+    IonButton, IonIcon, IonFooter,
     CommonModule,
   ],
 })
@@ -26,6 +27,10 @@ export class Posten1Page implements OnInit, OnDestroy {
   timerDisplay = '00:00:00';
   private interval: any;
   postenAbgeschlossen = false;
+
+  constructor(private router: Router) {
+    addIcons({ chevronBack });
+  }
 
   ngOnInit(): void {
     this.interval = setInterval(() => {
