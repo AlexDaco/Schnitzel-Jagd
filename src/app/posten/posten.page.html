@@ -1,29 +1,27 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-button slot="start" fill="clear" (click)="weiter()">
-      <ion-icon name="chevron-back"></ion-icon>
-    </ion-button>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/authorization"></ion-back-button>
+    </ion-buttons>
     <ion-title>{{ timerDisplay }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-
   <h2>{{ title }}</h2>
   <p>{{ description }}</p>
 
   <img [src]="mapImage" alt="Karte" style="width: 100%; border-radius: 8px;" />
-
 </ion-content>
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="weiter()">
-    Weiter
-  </ion-button>
+    <ion-button expand="block" color="primary" (click)="weiter()">
+      Weiter
+    </ion-button>
   } @else {
-  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-    Posten überspringen
-  </ion-button>
+    <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
+      Posten überspringen
+    </ion-button>
   }
 </ion-footer>

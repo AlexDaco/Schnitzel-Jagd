@@ -10,7 +10,6 @@ import { addIcons } from 'ionicons';
 import { mapOutline, cameraOutline } from 'ionicons/icons';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera } from '@capacitor/camera';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-authorization',
@@ -26,34 +25,36 @@ import { Router } from '@angular/router';
 export class AuthorizationPage {
   private readonly router = inject(Router);
 
-  gpsEnabled = true;
+  gpsEnabled = false;
   cameraEnabled = false;
+
+  constructor() {
+    addIcons({ mapOutline, cameraOutline });
+  }
 
   get allAccepted(): boolean {
     return this.gpsEnabled && this.cameraEnabled;
   }
 
-  constructor(private router: Router) {
-    addIcons({ mapOutline, cameraOutline });
-  }
-
   async onGpsToggle(): Promise<void> {
-    if (this.gpsEnabled) {
-      const permission = await Geolocation.requestPermissions();
-      this.gpsEnabled = permission.location === 'granted';
+    if (!this.gpsEnabled) {
+      return;
     }
+    const permission = await Geolocation.requestPermissions();
+    this.gpsEnabled = permission.location === 'granted';
   }
 
   async onCameraToggle(): Promise<void> {
-    if (this.cameraEnabled) {
-      const permission = await Camera.requestPermissions({ permissions: ['camera'] });
-      this.cameraEnabled = permission.camera === 'granted';
+    if (!this.cameraEnabled) {
+      return;
     }
+    const permission = await Camera.requestPermissions({ permissions: ['camera'] });
+    this.cameraEnabled = permission.camera === 'granted';
   }
 
   weiter(): void {
     if (this.allAccepted) {
-      this.router.navigate(['/posten']);
+      this.router.navigate(['/stations']);
     }
   }
 }
