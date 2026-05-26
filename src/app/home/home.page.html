@@ -6,33 +6,36 @@
 
 <ion-content>
   <ion-list class="leaderboard" lines="none">
-    <ion-item *ngFor="let entry of entries; let i = index"
-              class="entry"
-              [class.rank-1]="i === 0"
-              [class.rank-2]="i === 1"
-              [class.rank-3]="i === 2">
 
-      <!--Rang-Badge-->
-      <div slot="start" class="rang-badge">
-        <span class="rang-zahl">{{ i + 1 }}</span>
-      </div>
+    @for (entry of entries; track entry.id; let i = $index) {
+      <ion-item class="entry"
+                [class.rank-1]="i === 0"
+                [class.rank-2]="i === 1"
+                [class.rank-3]="i === 2">
 
-      <!-- Name und Datum  -->
-      <ion-label>
-        <h2 class="name">{{ entry.name }}</h2>
-        <p class="datum">{{ entry.datum | date:'dd.MM.yyyy' }}</p>
-      </ion-label>
-
-      <!--  Stats -->
-      <div slot="end" class="time-stats">
-        <div class="dauer-big">{{ formatDauer(entry.dauerSekunden) }}</div>
-        <div class="kleine-stats">
-          <span>🥩 {{ entry.schnitzel }}</span>
-          <span>🥔 {{ entry.kartoffeln }}</span>
+        <!-- Rang-Badge -->
+        <div slot="start" class="rang-badge">
+          <span class="rang-zahl">{{ i + 1 }}</span>
         </div>
-      </div>
 
-    </ion-item>
+        <!-- Name und Datum -->
+        <ion-label>
+          <h2 class="name">{{ entry.name }}</h2>
+          <p class="datum">{{ entry.datum | date:'dd.MM.yyyy' }}</p>
+        </ion-label>
+
+        <!-- Stats -->
+        <div slot="end" class="time-stats">
+          <div class="dauer-big">{{ formatDauer(entry.dauerSekunden) }}</div>
+          <div class="kleine-stats">
+            <span>🥩 {{ entry.schnitzel }}</span>
+            <span>🥔 {{ entry.kartoffeln }}</span>
+          </div>
+        </div>
+
+      </ion-item>
+    }
+
   </ion-list>
 </ion-content>
 
