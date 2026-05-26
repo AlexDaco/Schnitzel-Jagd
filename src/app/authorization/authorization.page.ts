@@ -20,7 +20,7 @@ import { mapOutline, cameraOutline } from 'ionicons/icons';
   ],
 })
 export class AuthorizationPage {
-  gpsEnabled = true;
+  gpsEnabled = false;
   cameraEnabled = false;
 
   get allAccepted(): boolean {
