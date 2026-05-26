@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonLabel, IonToggle, IonButton, IonIcon, IonFooter,
@@ -23,7 +24,9 @@ import { Router } from '@angular/router';
   ],
 })
 export class AuthorizationPage {
-  gpsEnabled = false;
+  private readonly router = inject(Router);
+
+  gpsEnabled = true;
   cameraEnabled = false;
 
   get allAccepted(): boolean {
