@@ -7,9 +7,26 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="ion-padding" style="text-align: center;">
   <h2>{{ title }}</h2>
   <p>{{ description }}</p>
+
+  <div style="font-size: 5rem; margin-top: 2rem;">
+    🔄
+  </div>
+
+  <div style="margin-top: 2rem;">
+    <p style="font-size: 2rem; font-weight: bold;">{{ fortschritt }}%</p>
+    <div style="background: #e0e0e0; border-radius: 8px; height: 20px; overflow: hidden;">
+      <div [style.width]="fortschritt + '%'"
+           style="background: #3880ff; height: 100%; transition: width 0.2s;">
+      </div>
+    </div>
+  </div>
+
+  @if (postenAbgeschlossen && istKopfueber) {
+  <p style="color: green; margin-top: 1rem;">✓ Handy erfolgreich kopfüber gehalten!</p>
+  }
 </ion-content>
 
 <ion-footer class="ion-padding">
