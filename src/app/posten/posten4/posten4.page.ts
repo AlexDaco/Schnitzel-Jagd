@@ -20,12 +20,13 @@ import { Router } from '@angular/router';
 })
 export class Posten4Page implements OnInit, OnDestroy {
   title = 'Posten 4';
-  description = 'Drehe dein Handy auf den Kopf';
+  description = 'Dreh dein Smartphone auf den Kopf';
 
   timer = 0;
   timerDisplay = '00:00:00';
   private interval: any;
   postenAbgeschlossen = false;
+  istKopfueber = false;
 
   constructor(private router: Router) {
     addIcons({ chevronBack });
@@ -42,10 +43,28 @@ export class Posten4Page implements OnInit, OnDestroy {
         String(m).padStart(2, '0') + ':' +
         String(s).padStart(2, '0');
     }, 1000);
+
+    window.addEventListener('deviceorientation', this.onOrientation);
   }
 
   ngOnDestroy(): void {
     clearInterval(this.interval);
+    window.removeEventListener('deviceorientation', this.onOrientation);
+  }
+
+  fortschritt = 0;
+
+  onOrientation = (event: DeviceOrientationEvent): void => {
+    const beta = event.beta ?? 0;
+    const absBeta = Math.abs(beta);
+
+    this.fortschritt = Math.min(100, Math.round((absBeta / 180) * 100));
+
+    if (absBeta > 170 && !this.postenAbgeschlossen) {
+      this.istKopfueber = true;
+      this.postenAbgeschlossen = true;
+      this.fortschritt = 100;
+    }
   }
 
   postenUeberspringen(): void {
