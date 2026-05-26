@@ -11,6 +11,10 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'stations',
+    loadComponent: () =>
+      import('./stations/stations.page').then((m) => m.StationsPage),
+  },
     path: 'authorization',
     loadComponent: () => import('./authorization/authorization.page').then( m => m.AuthorizationPage)
   },
