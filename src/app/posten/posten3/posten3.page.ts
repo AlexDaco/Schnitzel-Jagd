@@ -12,7 +12,7 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { GameService } from '../../services/game.service';
 
 const EXPECTED_QR = 'M335@ICT-BZ';
-const SCHNITZEL_THRESHOLD_S = 60;
+const SCHNITZEL_THRESHOLD_S = 120;
 
 @Component({
   selector: 'app-posten3',
@@ -25,16 +25,16 @@ const SCHNITZEL_THRESHOLD_S = 60;
   ],
 })
 export class Posten3Page implements OnInit, OnDestroy {
+  title = 'Posten 3';
+  description = 'Gehe zur Tür des Kursraum und scanne den QR code. Der QR Code hängt an der Türe vor dem reingehen.';
   timer = 0;
-  timerDisplay = '00:00';
+  timerDisplay = '00:00:00';
+  private interval: any;
   postenAbgeschlossen = false;
-  wasSkipped = false;
   scanFehler = '';
-  ergebnisText = '';
   hatSchnitzel = false;
-  moduleLaden = false;
-
-  private intervalId: any;
+  wasSkipped = false;
+  ergebnisText = '';
 
   constructor(private router: Router, private gameService: GameService) {
     addIcons({ chevronBack, qrCodeOutline });
@@ -55,66 +55,31 @@ export class Posten3Page implements OnInit, OnDestroy {
           : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
       return;
     }
-    this.gameService.startPosten(3);
-    this.timer = this.gameService.getPostenElapsed(3);
-    this.intervalId = setInterval(() => {
-      this.timer = this.gameService.getPostenElapsed(3);
       this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
   }
 
   ngOnDestroy(): void {
-    clearInterval(this.intervalId);
+    clearInterval(this.interval);
   }
 
   async qrScannen(): Promise<void> {
-    this.scanFehler = '';
-
-    // 1. Camera permission via the BarcodeScanner plugin itself (MLKit has its own check)
-    try {
-      const perm = await BarcodeScanner.requestPermissions();
-      if (perm.camera !== 'granted') {
-        this.scanFehler = 'Kamera-Berechtigung fehlt. Bitte in den Einstellungen erlauben.';
-        return;
-      }
-    } catch {
-      this.scanFehler = 'Kamera-Berechtigung konnte nicht abgefragt werden.';
-      return;
-    }
-
-    // 2. Google Barcode Scanner Module check (needed on some Android devices)
-    try {
-      const { available } = await BarcodeScanner.isGoogleBarcodeScannerModuleAvailable();
-      if (!available) {
-        this.moduleLaden = true;
-        this.scanFehler = 'Scanner-Modul wird installiert… bitte danach nochmals tippen.';
-        await BarcodeScanner.installGoogleBarcodeScannerModule();
-        this.moduleLaden = false;
-        return;
-      }
-    } catch {
-      // Module check failed silently — try scan anyway
-    }
-
-    // 3. Scan
-    try {
-      const { barcodes } = await BarcodeScanner.scan({
-        formats: [BarcodeFormat.QrCode],
-      });
-      if (barcodes.length > 0) {
-        const wert = barcodes[0].rawValue;
-        if (wert === EXPECTED_QR) {
-          this.abschliessen();
-        } else {
-          this.scanFehler = 'Ups! Falscher QR-Code.';
+      this.scanFehler = '';
+      try {
+        const { barcodes } = await BarcodeScanner.scan();
+        if (barcodes.length > 0) {
+          const wert = barcodes[0].rawValue;
+          if (wert === EXPECTED_QR) {
+            this.postenAbgeschlossen = true;
+          } else {
+            this.scanFehler = 'Falscher QR-Code. Bitte den richtigen scannen.';
+          }
         }
-      } else {
-        this.scanFehler = 'Kein QR-Code gefunden. Nochmals versuchen.';
+      } catch (e) {
+        this.scanFehler = 'Kamera konnte nicht geöffnet werden.';
       }
-    } catch (e: any) {
-      this.scanFehler = 'Scan abgebrochen oder fehlgeschlagen.';
     }
-  }
+
 
   private abschliessen(): void {
     clearInterval(this.intervalId);
@@ -130,24 +95,9 @@ export class Posten3Page implements OnInit, OnDestroy {
   }
 
   postenUeberspringen(): void {
-    clearInterval(this.intervalId);
+    clearInterval(this.interval);
     this.gameService.recordResult(3, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
-  }
-
-  postenWiederholen(): void {
-    this.gameService.clearResult(3);
-    this.postenAbgeschlossen = false;
-    this.wasSkipped = false;
-    this.ergebnisText = '';
-    this.hatSchnitzel = false;
-    this.scanFehler = '';
-    this.timer = this.gameService.getPostenElapsed(3);
-    this.timerDisplay = this.formatTime(this.timer);
-    this.intervalId = setInterval(() => {
-      this.timer = this.gameService.getPostenElapsed(3);
-      this.timerDisplay = this.formatTime(this.timer);
-    }, 1000);
   }
 
   weiter(): void {
@@ -157,6 +107,7 @@ export class Posten3Page implements OnInit, OnDestroy {
   zurueck(): void {
     this.router.navigate(['/posten']);
   }
+
 
   private formatTime(s: number): string {
     return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
