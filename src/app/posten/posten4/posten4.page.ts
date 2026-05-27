@@ -25,6 +25,8 @@ const SCHNITZEL_THRESHOLD_S = 10;
 export class Posten4Page implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
 
+  title = 'Posten 4';
+  description = 'Dreh dein Smartphone auf den Kopf';
   timer = 0;
   timerDisplay = '00:00';
   fortschritt = 0;
@@ -33,9 +35,8 @@ export class Posten4Page implements OnInit, OnDestroy {
   ergebnisText = '';
   hatSchnitzel = false;
   sensorAktiv = false;
-
-  private intervalId: any;
-  private calibratedBeta: number | null = null;
+  calibratedBeta: number | null = null;
+  private interval: any;
 
   constructor(private router: Router, private gameService: GameService) {
     addIcons({ chevronBack });
@@ -57,12 +58,10 @@ export class Posten4Page implements OnInit, OnDestroy {
           : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
       return;
     }
-    this.gameService.startPosten(4);
-    this.timer = this.gameService.getPostenElapsed(4);
-    this.intervalId = setInterval(() => {
-      this.timer = this.gameService.getPostenElapsed(4);
-      this.timerDisplay = this.formatTime(this.timer);
-    }, 1000);
+    this.interval = setInterval(() => {
+          this.timer++;
+          this.timerDisplay = this.formatTime(this.timer);
+        }, 1000);
 
     // deviceorientationabsolute is more reliable on Android; fall back to deviceorientation
     const win = window as any;
@@ -77,29 +76,21 @@ export class Posten4Page implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    clearInterval(this.intervalId);
-    (window as any).removeEventListener('deviceorientationabsolute', this.onOrientation);
-    window.removeEventListener('deviceorientation', this.onOrientation);
-    window.removeEventListener('devicemotion', this.onMotion);
+    clearInterval(this.interval);
   }
 
-  // Calibrates on first event so 0% = exact position at page entry regardless of hold angle.
-  readonly onOrientation = (event: DeviceOrientationEvent): void => {
-    this.ngZone.run(() => {
-      const beta = event.beta ?? 0;
+readonly onOrientation = (event: DeviceOrientationEvent): void => {
+  this.ngZone.run(() => {
+    const beta = event.beta ?? 0;
+    const absBeta = Math.abs(beta);
 
-      if (this.calibratedBeta === null) {
-        this.calibratedBeta = beta;
-      }
+    this.fortschritt = Math.min(100, Math.round((absBeta / 180) * 100));
 
-      const deviation = Math.abs(beta - this.calibratedBeta);
-      this.fortschritt = Math.min(100, Math.round(deviation / 180 * 100));
-
-      if (deviation > 150 && !this.postenAbgeschlossen) {
-        this.abschliessen();
-      }
-    });
-  };
+    if (absBeta > 170 && !this.postenAbgeschlossen) {
+      this.abschliessen();
+    }
+  });
+};
 
   // DeviceMotion fallback: y ≈ -9.8 upright portrait → y ≈ +9.8 upside-down
   readonly onMotion = (event: DeviceMotionEvent): void => {
@@ -114,17 +105,14 @@ export class Posten4Page implements OnInit, OnDestroy {
       if (prog > this.fortschritt) {
         this.fortschritt = prog;
       }
-      if (y > 7 && !this.postenAbgeschlossen) {
+      if (y > 170 && !this.postenAbgeschlossen) {
         this.abschliessen();
       }
     });
   };
 
   private abschliessen(): void {
-    clearInterval(this.intervalId);
-    (window as any).removeEventListener('deviceorientationabsolute', this.onOrientation);
-    window.removeEventListener('deviceorientation', this.onOrientation);
-    window.removeEventListener('devicemotion', this.onMotion);
+    clearInterval(this.interval);
     this.postenAbgeschlossen = true;
     this.fortschritt = 100;
     const schnitzel = this.timer <= SCHNITZEL_THRESHOLD_S ? 1 : 0;
@@ -138,33 +126,9 @@ export class Posten4Page implements OnInit, OnDestroy {
   }
 
   postenUeberspringen(): void {
-    clearInterval(this.intervalId);
-    (window as any).removeEventListener('deviceorientationabsolute', this.onOrientation);
-    window.removeEventListener('deviceorientation', this.onOrientation);
-    window.removeEventListener('devicemotion', this.onMotion);
+    clearInterval(this.interval);
     this.gameService.recordResult(4, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
-  }
-
-  postenWiederholen(): void {
-    this.gameService.clearResult(4);
-    this.postenAbgeschlossen = false;
-    this.wasSkipped = false;
-    this.ergebnisText = '';
-    this.hatSchnitzel = false;
-    this.fortschritt = 0;
-    this.calibratedBeta = null;
-    this.timer = this.gameService.getPostenElapsed(4);
-    this.timerDisplay = this.formatTime(this.timer);
-    this.intervalId = setInterval(() => {
-      this.timer = this.gameService.getPostenElapsed(4);
-      this.timerDisplay = this.formatTime(this.timer);
-    }, 1000);
-    const win = window as any;
-    const useAbsolute = 'ondeviceorientationabsolute' in window;
-    win.addEventListener(useAbsolute ? 'deviceorientationabsolute' : 'deviceorientation', this.onOrientation);
-    window.addEventListener('devicemotion', this.onMotion);
-    this.sensorAktiv = true;
   }
 
   weiter(): void {
