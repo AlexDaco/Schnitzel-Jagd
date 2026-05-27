@@ -11,7 +11,7 @@
   <h2>{{ title }}</h2>
   <p>{{ description }}</p>
   <p style="font-size: 0.85rem; color: var(--ion-color-medium);">
-    Unter 2 Minute = 🥩 Schnitzel
+    Unter 2 Minuten = 🥩 Schnitzel
   </p>
 
   @if (!postenAbgeschlossen) {
@@ -25,19 +25,27 @@
   <p style="color: red; margin-top: 1rem;">{{ scanFehler }}</p>
   }
 
-  @if (postenAbgeschlossen) {
+  @if (postenAbgeschlossen && !wasSkipped) {
   <p style="color: green; margin-top: 1rem;">✓ QR-Code erfolgreich gescannt!</p>
+  }
+
+  @if (postenAbgeschlossen) {
+  <div class="result-box" [class.schnitzel]="hatSchnitzel" [class.kartoffel]="!hatSchnitzel">
+    {{ ergebnisText }}
+  </div>
   }
 </ion-content>
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-  <ion-button expand="block" color="primary" (click)="weiter()">
-    Weiter
-  </ion-button>
+    @if (wasSkipped) {
+      <ion-button expand="block" color="primary" (click)="postenWiederholen()">Posten durchführen</ion-button>
+    } @else {
+      <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    }
   } @else {
-  <ion-button expand="block" color="danger" (click)="postenUeberspringen()">
-    Posten überspringen
-  </ion-button>
+    <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
+      Posten überspringen
+    </ion-button>
   }
 </ion-footer>
