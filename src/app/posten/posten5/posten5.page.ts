@@ -32,6 +32,7 @@ export class Posten5Page implements OnInit, OnDestroy {
 
   /** 1 = einstecken, 2 = ausstecken, 3 = fertig */
   currentStep: 1 | 2 | 3 = 1;
+  wasSkipped = false;
   private wasCharging: boolean | null = null;
   private stepStartTime = 0;
 
@@ -48,11 +49,26 @@ export class Posten5Page implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    const done = this.gameService.getResult(5);
+    if (done) {
+      this.postenAbgeschlossen = true;
+      this.hatSchnitzel = done.schnitzel === 1;
+      this.timer = done.timeSeconds;
+      this.timerDisplay = this.formatTime(done.timeSeconds);
+      this.currentStep = 3;
+      this.wasSkipped = done.skipped;
+      this.ergebnisText = done.skipped
+        ? '⏭️ Posten übersprungen.'
+        : done.schnitzel === 1
+          ? `🥩 Schnitzel! Deine Zeit: ${done.timeSeconds}s`
+          : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
+      return;
+    }
+    this.gameService.startPosten(5);
+    this.timer = this.gameService.getPostenElapsed(5);
     this.intervalId = setInterval(() => {
-      this.timer++;
-      const m = Math.floor(this.timer / 60);
-      const s = this.timer % 60;
-      this.timerDisplay = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      this.timer = this.gameService.getPostenElapsed(5);
+      this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
 
     try {
@@ -118,8 +134,31 @@ export class Posten5Page implements OnInit, OnDestroy {
   postenUeberspringen(): void {
     clearInterval(this.intervalId);
     clearInterval(this.batteryIntervalId);
-    this.gameService.recordResult(5, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.gameService.recordResult(5, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
+  }
+
+  async postenWiederholen(): Promise<void> {
+    this.gameService.clearResult(5);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.currentStep = 1;
+    this.stepStartTime = 0;
+    this.wasCharging = null;
+    this.timer = this.gameService.getPostenElapsed(5);
+    this.timerDisplay = this.formatTime(this.timer);
+    this.intervalId = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(5);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
+    try {
+      const info = await Device.getBatteryInfo();
+      this.wasCharging = info.isCharging === true;
+      if (this.wasCharging) { this.currentStep = 2; this.stepStartTime = this.timer; }
+    } catch { this.wasCharging = false; }
+    this.batteryIntervalId = setInterval(() => this.checkBattery(), 1000);
   }
 
   weiter(): void {
@@ -128,5 +167,9 @@ export class Posten5Page implements OnInit, OnDestroy {
 
   zurueck(): void {
     this.router.navigate(['/posten']);
+  }
+
+  private formatTime(s: number): string {
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   }
 }

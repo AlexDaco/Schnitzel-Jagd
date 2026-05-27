@@ -28,6 +28,7 @@ export class Posten3Page implements OnInit, OnDestroy {
   timer = 0;
   timerDisplay = '00:00';
   postenAbgeschlossen = false;
+  wasSkipped = false;
   scanFehler = '';
   ergebnisText = '';
   hatSchnitzel = false;
@@ -40,11 +41,25 @@ export class Posten3Page implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const done = this.gameService.getResult(3);
+    if (done) {
+      this.postenAbgeschlossen = true;
+      this.hatSchnitzel = done.schnitzel === 1;
+      this.timer = done.timeSeconds;
+      this.timerDisplay = this.formatTime(done.timeSeconds);
+      this.wasSkipped = done.skipped;
+      this.ergebnisText = done.skipped
+        ? '⏭️ Posten übersprungen.'
+        : done.schnitzel === 1
+          ? `🥩 Schnitzel! Deine Zeit: ${done.timeSeconds}s`
+          : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
+      return;
+    }
+    this.gameService.startPosten(3);
+    this.timer = this.gameService.getPostenElapsed(3);
     this.intervalId = setInterval(() => {
-      this.timer++;
-      const m = Math.floor(this.timer / 60);
-      const s = this.timer % 60;
-      this.timerDisplay = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      this.timer = this.gameService.getPostenElapsed(3);
+      this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
   }
 
@@ -91,7 +106,7 @@ export class Posten3Page implements OnInit, OnDestroy {
         if (wert === EXPECTED_QR) {
           this.abschliessen();
         } else {
-          this.scanFehler = `Ups, falscher QR-Code: "${wert}". Bitte den richtigen scannen!`;
+          this.scanFehler = 'Ups! Falscher QR-Code.';
         }
       } else {
         this.scanFehler = 'Kein QR-Code gefunden. Nochmals versuchen.';
@@ -116,8 +131,23 @@ export class Posten3Page implements OnInit, OnDestroy {
 
   postenUeberspringen(): void {
     clearInterval(this.intervalId);
-    this.gameService.recordResult(3, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.gameService.recordResult(3, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
+  }
+
+  postenWiederholen(): void {
+    this.gameService.clearResult(3);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.scanFehler = '';
+    this.timer = this.gameService.getPostenElapsed(3);
+    this.timerDisplay = this.formatTime(this.timer);
+    this.intervalId = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(3);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
   }
 
   weiter(): void {
@@ -126,5 +156,9 @@ export class Posten3Page implements OnInit, OnDestroy {
 
   zurueck(): void {
     this.router.navigate(['/posten']);
+  }
+
+  private formatTime(s: number): string {
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   }
 }

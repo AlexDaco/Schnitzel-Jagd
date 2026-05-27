@@ -29,22 +29,39 @@ export class Posten4Page implements OnInit, OnDestroy {
   timerDisplay = '00:00';
   fortschritt = 0;
   postenAbgeschlossen = false;
+  wasSkipped = false;
   ergebnisText = '';
   hatSchnitzel = false;
   sensorAktiv = false;
 
   private intervalId: any;
+  private calibratedBeta: number | null = null;
 
   constructor(private router: Router, private gameService: GameService) {
     addIcons({ chevronBack });
   }
 
   ngOnInit(): void {
+    const done = this.gameService.getResult(4);
+    if (done) {
+      this.postenAbgeschlossen = true;
+      this.hatSchnitzel = done.schnitzel === 1;
+      this.timer = done.timeSeconds;
+      this.timerDisplay = this.formatTime(done.timeSeconds);
+      this.fortschritt = 100;
+      this.wasSkipped = done.skipped;
+      this.ergebnisText = done.skipped
+        ? '⏭️ Posten übersprungen.'
+        : done.schnitzel === 1
+          ? `🥩 Schnitzel! Deine Zeit: ${done.timeSeconds}s`
+          : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
+      return;
+    }
+    this.gameService.startPosten(4);
+    this.timer = this.gameService.getPostenElapsed(4);
     this.intervalId = setInterval(() => {
-      this.timer++;
-      const m = Math.floor(this.timer / 60);
-      const s = this.timer % 60;
-      this.timerDisplay = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      this.timer = this.gameService.getPostenElapsed(4);
+      this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
 
     // deviceorientationabsolute is more reliable on Android; fall back to deviceorientation
@@ -66,46 +83,39 @@ export class Posten4Page implements OnInit, OnDestroy {
     window.removeEventListener('devicemotion', this.onMotion);
   }
 
-  // deviceorientation/absolute: beta is the front-back tilt (-180…180)
-  // Phone upright portrait: beta ≈ 90  |  Phone upside-down: beta ≈ -90 or near ±180
+  // Calibrates on first event so 0% = exact position at page entry regardless of hold angle.
   readonly onOrientation = (event: DeviceOrientationEvent): void => {
     this.ngZone.run(() => {
-      const beta  = event.beta  ?? 0;
-      const gamma = event.gamma ?? 0;
+      const beta = event.beta ?? 0;
 
-      // Progress towards "kopfüber": use absolute beta deviation from 0 (flat)
-      // approaching ±180 means almost face-down; approaching -90 means top-down
-      const absBeta = Math.abs(beta);
-      this.fortschritt = Math.min(100, Math.round((absBeta / 180) * 100));
+      if (this.calibratedBeta === null) {
+        this.calibratedBeta = beta;
+      }
 
-      // Consider completed when phone is clearly face-down OR rotated past 150°
-      const kopfueber = absBeta > 150 || Math.abs(gamma) > 150;
-      if (kopfueber && !this.postenAbgeschlossen) {
+      const deviation = Math.abs(beta - this.calibratedBeta);
+      this.fortschritt = Math.min(100, Math.round(deviation / 180 * 100));
+
+      if (deviation > 150 && !this.postenAbgeschlossen) {
         this.abschliessen();
       }
     });
   };
 
-  // DeviceMotion fallback: use gravity to detect upside-down
+  // DeviceMotion fallback: y ≈ -9.8 upright portrait → y ≈ +9.8 upside-down
   readonly onMotion = (event: DeviceMotionEvent): void => {
     if (this.postenAbgeschlossen) return;
     const g = event.accelerationIncludingGravity;
     if (!g) return;
     const y = g.y ?? 0;
-    const z = g.z ?? 0;
 
     this.ngZone.run(() => {
-      // y ≈ -9.8 means phone normal portrait; y ≈ +9.8 means upside-down
-      // Or z ≈ 9.8 means face-down
-      const upsideDown = y > 7 || z > 7;
-      if (!this.postenAbgeschlossen) {
-        const prog = Math.min(100, Math.round(Math.max(y, z) / 9.8 * 100));
-        if (prog > this.fortschritt) {
-          this.fortschritt = prog;
-        }
-        if (upsideDown) {
-          this.abschliessen();
-        }
+      // Map -9.8 → 0%, +9.8 → 100%
+      const prog = Math.min(100, Math.max(0, Math.round((y + 9.8) / 19.6 * 100)));
+      if (prog > this.fortschritt) {
+        this.fortschritt = prog;
+      }
+      if (y > 7 && !this.postenAbgeschlossen) {
+        this.abschliessen();
       }
     });
   };
@@ -132,8 +142,29 @@ export class Posten4Page implements OnInit, OnDestroy {
     (window as any).removeEventListener('deviceorientationabsolute', this.onOrientation);
     window.removeEventListener('deviceorientation', this.onOrientation);
     window.removeEventListener('devicemotion', this.onMotion);
-    this.gameService.recordResult(4, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.gameService.recordResult(4, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
+  }
+
+  postenWiederholen(): void {
+    this.gameService.clearResult(4);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.fortschritt = 0;
+    this.calibratedBeta = null;
+    this.timer = this.gameService.getPostenElapsed(4);
+    this.timerDisplay = this.formatTime(this.timer);
+    this.intervalId = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(4);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
+    const win = window as any;
+    const useAbsolute = 'ondeviceorientationabsolute' in window;
+    win.addEventListener(useAbsolute ? 'deviceorientationabsolute' : 'deviceorientation', this.onOrientation);
+    window.addEventListener('devicemotion', this.onMotion);
+    this.sensorAktiv = true;
   }
 
   weiter(): void {
@@ -142,5 +173,9 @@ export class Posten4Page implements OnInit, OnDestroy {
 
   zurueck(): void {
     this.router.navigate(['/posten']);
+  }
+
+  private formatTime(s: number): string {
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   }
 }

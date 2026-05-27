@@ -11,7 +11,7 @@ import { Network } from '@capacitor/network';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { GameService } from '../../services/game.service';
 
-const SCHNITZEL_THRESHOLD_S = 20;
+const SCHNITZEL_THRESHOLD_S = 60;
 
 @Component({
   selector: 'app-posten6',
@@ -32,6 +32,7 @@ export class Posten6Page implements OnInit, OnDestroy {
 
   /** 1 = verbinden, 2 = trennen, 3 = fertig */
   currentStep: 1 | 2 | 3 = 1;
+  wasSkipped = false;
   private wasConnected: boolean | null = null;
   private stepStartTime = 0;
 
@@ -48,11 +49,26 @@ export class Posten6Page implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    const done = this.gameService.getResult(6);
+    if (done) {
+      this.postenAbgeschlossen = true;
+      this.hatSchnitzel = done.schnitzel === 1;
+      this.timer = done.timeSeconds;
+      this.timerDisplay = this.formatTime(done.timeSeconds);
+      this.currentStep = 3;
+      this.wasSkipped = done.skipped;
+      this.ergebnisText = done.skipped
+        ? '⏭️ Posten übersprungen.'
+        : done.schnitzel === 1
+          ? `🥩 Schnitzel! Deine Zeit: ${done.timeSeconds}s`
+          : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
+      return;
+    }
+    this.gameService.startPosten(6);
+    this.timer = this.gameService.getPostenElapsed(6);
     this.intervalId = setInterval(() => {
-      this.timer++;
-      const m = Math.floor(this.timer / 60);
-      const s = this.timer % 60;
-      this.timerDisplay = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      this.timer = this.gameService.getPostenElapsed(6);
+      this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
 
     try {
@@ -118,8 +134,31 @@ export class Posten6Page implements OnInit, OnDestroy {
   postenUeberspringen(): void {
     clearInterval(this.intervalId);
     clearInterval(this.networkIntervalId);
-    this.gameService.recordResult(6, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.gameService.recordResult(6, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
+  }
+
+  async postenWiederholen(): Promise<void> {
+    this.gameService.clearResult(6);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.currentStep = 1;
+    this.stepStartTime = 0;
+    this.wasConnected = null;
+    this.timer = this.gameService.getPostenElapsed(6);
+    this.timerDisplay = this.formatTime(this.timer);
+    this.intervalId = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(6);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
+    try {
+      const status = await Network.getStatus();
+      this.wasConnected = status.connected === true;
+      if (this.wasConnected) { this.currentStep = 2; this.stepStartTime = this.timer; }
+    } catch { this.wasConnected = false; }
+    this.networkIntervalId = setInterval(() => this.checkNetwork(), 1000);
   }
 
   weiter(): void {
@@ -128,5 +167,9 @@ export class Posten6Page implements OnInit, OnDestroy {
 
   zurueck(): void {
     this.router.navigate(['/posten']);
+  }
+
+  private formatTime(s: number): string {
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   }
 }

@@ -43,7 +43,11 @@
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    @if (wasSkipped) {
+      <ion-button expand="block" color="primary" (click)="postenWiederholen()">Posten durchführen</ion-button>
+    } @else {
+      <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    }
   } @else {
     <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
       Posten überspringen

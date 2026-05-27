@@ -24,9 +24,12 @@
       @for (step of steps; track step.id) {
         <li
           [class.done]="currentStep > step.id"
+          [class.skipped]="wasSkipped && currentStep > step.id"
           [class.active]="currentStep === step.id">
           <span class="step-marker">
-            @if (currentStep > step.id) { ✓ } @else { {{ step.id }} }
+            @if (currentStep > step.id) {
+              @if (wasSkipped) { <span style="color: var(--ion-color-danger)">✗</span> } @else { ✓ }
+            } @else { {{ step.id }} }
           </span>
           <span class="step-label">{{ step.label }}</span>
         </li>
@@ -43,7 +46,11 @@
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    @if (wasSkipped) {
+      <ion-button expand="block" color="primary" (click)="postenWiederholen()">Posten durchführen</ion-button>
+    } @else {
+      <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    }
   } @else {
     <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
       Posten überspringen

@@ -10,11 +10,30 @@ export interface PostenResult {
 @Injectable({ providedIn: 'root' })
 export class GameService {
   private results = new Map<number, PostenResult>();
+  private postenStartMs = new Map<number, number>();
   gameStartDate: Date = new Date();
 
   startNewGame(): void {
     this.results.clear();
+    this.postenStartMs.clear();
     this.gameStartDate = new Date();
+  }
+
+  /** Records start timestamp for a posten the first time it is entered. */
+  startPosten(postenId: number): void {
+    if (!this.postenStartMs.has(postenId)) {
+      this.postenStartMs.set(postenId, Date.now());
+    }
+  }
+
+  /** Elapsed seconds since the posten was first entered. */
+  getPostenElapsed(postenId: number): number {
+    const start = this.postenStartMs.get(postenId);
+    return start === undefined ? 0 : Math.floor((Date.now() - start) / 1000);
+  }
+
+  clearResult(postenId: number): void {
+    this.results.delete(postenId);
   }
 
   recordResult(postenId: number, result: PostenResult): void {

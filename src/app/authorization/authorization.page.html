@@ -16,48 +16,33 @@
       <ion-icon name="map-outline" slot="start" size="large"
                 [color]="gpsEnabled ? 'success' : 'medium'"></ion-icon>
       <ion-label>GPS</ion-label>
-      <div slot="end" class="toggle-wrap">
-        @if (gpsEnabled) {
-          <span class="granted-badge">✓</span>
-        }
-        <ion-toggle
-          [(ngModel)]="gpsEnabled"
-          (ionChange)="onGpsToggle()"
-          [disabled]="gpsEnabled">
-        </ion-toggle>
-      </div>
+      <ion-toggle slot="end"
+        [(ngModel)]="gpsEnabled"
+        (ionChange)="onGpsToggle()"
+        [disabled]="gpsEnabled">
+      </ion-toggle>
     </ion-item>
 
     <ion-item [class.item-granted]="cameraEnabled">
       <ion-icon name="camera-outline" slot="start" size="large"
                 [color]="cameraEnabled ? 'success' : 'medium'"></ion-icon>
       <ion-label>Kamera</ion-label>
-      <div slot="end" class="toggle-wrap">
-        @if (cameraEnabled) {
-          <span class="granted-badge">✓</span>
-        }
-        <ion-toggle
-          [(ngModel)]="cameraEnabled"
-          (ionChange)="onCameraToggle()"
-          [disabled]="cameraEnabled">
-        </ion-toggle>
-      </div>
+      <ion-toggle slot="end"
+        [(ngModel)]="cameraEnabled"
+        (ionChange)="onCameraToggle()"
+        [disabled]="cameraEnabled">
+      </ion-toggle>
     </ion-item>
 
     <ion-item [class.item-granted]="motionEnabled">
       <ion-icon name="phone-portrait-outline" slot="start" size="large"
                 [color]="motionEnabled ? 'success' : 'medium'"></ion-icon>
       <ion-label>Bewegungssensor</ion-label>
-      <div slot="end" class="toggle-wrap">
-        @if (motionEnabled) {
-          <span class="granted-badge">✓</span>
-        }
-        <ion-toggle
-          [(ngModel)]="motionEnabled"
-          (ionChange)="onMotionToggle()"
-          [disabled]="motionEnabled">
-        </ion-toggle>
-      </div>
+      <ion-toggle slot="end"
+        [(ngModel)]="motionEnabled"
+        (ionChange)="onMotionToggle()"
+        [disabled]="motionEnabled">
+      </ion-toggle>
     </ion-item>
 
   </ion-list>

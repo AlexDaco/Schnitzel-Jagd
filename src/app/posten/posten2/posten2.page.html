@@ -10,7 +10,7 @@
 <ion-content [fullscreen]="true" class="ion-padding" style="text-align: center;">
   <h2>🏃 Lauf 20 Meter!</h2>
 
-  <div class="run-banner">30sec — run run run…</div>
+  <div class="run-banner">30sekunden — run run run…</div>
 
   <div class="timer-box">
     <div class="timer-label">⏱ Zeit</div>
@@ -37,7 +37,11 @@
 
 <ion-footer class="ion-padding">
   @if (postenAbgeschlossen) {
-    <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    @if (wasSkipped) {
+      <ion-button expand="block" color="primary" (click)="postenWiederholen()">Posten durchführen</ion-button>
+    } @else {
+      <ion-button expand="block" color="success" (click)="weiter()">Weiter →</ion-button>
+    }
   } @else {
     <ion-button expand="block" color="medium" fill="outline" (click)="postenUeberspringen()">
       Posten überspringen

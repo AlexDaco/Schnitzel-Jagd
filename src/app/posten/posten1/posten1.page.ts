@@ -14,7 +14,7 @@ import { GameService } from '../../services/game.service';
 const TARGET_LAT = 47.02753320993637;
 const TARGET_LNG = 8.30092852135301;
 const SCHNITZEL_THRESHOLD_S = 120;
-const REACH_RADIUS_M = 30;
+const REACH_RADIUS_M = 5;
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000;
@@ -41,6 +41,7 @@ export class Posten1Page implements OnInit, OnDestroy {
   timerDisplay = '00:00';
   distanzMeters: number | null = null;
   postenAbgeschlossen = false;
+  wasSkipped = false;
   ergebnisText = '';
   hatSchnitzel = false;
 
@@ -52,11 +53,25 @@ export class Posten1Page implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const done = this.gameService.getResult(1);
+    if (done) {
+      this.postenAbgeschlossen = true;
+      this.hatSchnitzel = done.schnitzel === 1;
+      this.timer = done.timeSeconds;
+      this.timerDisplay = this.formatTime(done.timeSeconds);
+      this.wasSkipped = done.skipped;
+      this.ergebnisText = done.skipped
+        ? '⏭️ Posten übersprungen.'
+        : done.schnitzel === 1
+          ? `🥩 Schnitzel! Deine Zeit: ${done.timeSeconds}s`
+          : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
+      return;
+    }
+    this.gameService.startPosten(1);
+    this.timer = this.gameService.getPostenElapsed(1);
     this.intervalId = setInterval(() => {
-      this.timer++;
-      const m = Math.floor(this.timer / 60);
-      const s = this.timer % 60;
-      this.timerDisplay = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      this.timer = this.gameService.getPostenElapsed(1);
+      this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
 
     this.startGps();
@@ -116,8 +131,24 @@ export class Posten1Page implements OnInit, OnDestroy {
       Geolocation.clearWatch({ id: this.watchId });
       this.watchId = null;
     }
-    this.gameService.recordResult(1, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.gameService.recordResult(1, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
+  }
+
+  postenWiederholen(): void {
+    this.gameService.clearResult(1);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.distanzMeters = null;
+    this.timer = this.gameService.getPostenElapsed(1);
+    this.timerDisplay = this.formatTime(this.timer);
+    this.intervalId = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(1);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
+    this.startGps();
   }
 
   weiter(): void {
@@ -126,5 +157,9 @@ export class Posten1Page implements OnInit, OnDestroy {
 
   zurueck(): void {
     this.router.navigate(['/posten']);
+  }
+
+  private formatTime(s: number): string {
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   }
 }
