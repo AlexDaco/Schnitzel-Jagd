@@ -4,7 +4,6 @@ import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { LeaderboardEntry } from '../models/leaderboard-entry';
-import { environment } from '../../environments/environment';
 
 const STORAGE_KEY = 'schnitzel-jagd-leaderboard';
 
@@ -66,8 +65,24 @@ export class LeaderboardService {
   }
 
   private submitToApi(entry: LeaderboardEntry): void {
-    if (!environment.leaderboardApiUrl) return;
-    this.http.post(environment.leaderboardApiUrl, entry)
+    const h = Math.floor(entry.dauerSekunden / 3600);
+    const m = Math.floor((entry.dauerSekunden % 3600) / 60);
+    const s = entry.dauerSekunden % 60;
+    const duration = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+    const body = new URLSearchParams({
+      'entry.1860183935': entry.name,
+      'entry.564282981':  String(entry.schnitzel),
+      'entry.1079317865': String(entry.kartoffeln),
+      'entry.985590604':  duration,
+    }).toString();
+
+    this.http
+      .post(
+        'https://docs.google.com/forms/u/0/d/e/1FAIpQLSe_rr4dfM11mWhSKwbjwoIzEDPi9ahrEsAsHhESicJ9zS9lTw/formResponse',
+        body,
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, responseType: 'text' },
+      )
       .pipe(catchError(() => of(null)))
       .subscribe();
   }
