@@ -35,7 +35,6 @@ export class Posten4Page implements OnInit, OnDestroy {
   ergebnisText = '';
   hatSchnitzel = false;
   sensorAktiv = false;
-  calibratedBeta: number | null = null;
   private interval: any;
 
   constructor(private router: Router, private gameService: GameService) {
@@ -58,54 +57,34 @@ export class Posten4Page implements OnInit, OnDestroy {
           : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
       return;
     }
-    this.interval = setInterval(() => {
-          this.timer++;
-          this.timerDisplay = this.formatTime(this.timer);
-        }, 1000);
+    this.startSensor();
+  }
 
-    // deviceorientationabsolute is more reliable on Android; fall back to deviceorientation
-    const win = window as any;
-    const useAbsolute = 'ondeviceorientationabsolute' in window;
-    win.addEventListener(
-      useAbsolute ? 'deviceorientationabsolute' : 'deviceorientation',
-      this.onOrientation,
-    );
-    // DeviceMotion as additional fallback
+  private startSensor(): void {
+    this.gameService.startPosten(4);
+    this.timer = this.gameService.getPostenElapsed(4);
+    this.interval = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(4);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
     window.addEventListener('devicemotion', this.onMotion);
     this.sensorAktiv = true;
   }
 
   ngOnDestroy(): void {
     clearInterval(this.interval);
+    window.removeEventListener('devicemotion', this.onMotion);
   }
 
-readonly onOrientation = (event: DeviceOrientationEvent): void => {
-  this.ngZone.run(() => {
-    const beta = event.beta ?? 0;
-    const absBeta = Math.abs(beta);
-
-    this.fortschritt = Math.min(100, Math.round((absBeta / 180) * 100));
-
-    if (absBeta > 170 && !this.postenAbgeschlossen) {
-      this.abschliessen();
-    }
-  });
-};
-
-  // DeviceMotion fallback: y ≈ -9.8 upright portrait → y ≈ +9.8 upside-down
+  // y ≈ -9.8 when held upright in portrait (normal) → y ≈ +9.8 when flipped upside down
   readonly onMotion = (event: DeviceMotionEvent): void => {
     if (this.postenAbgeschlossen) return;
     const g = event.accelerationIncludingGravity;
     if (!g) return;
     const y = g.y ?? 0;
-
     this.ngZone.run(() => {
-      // Map -9.8 → 0%, +9.8 → 100%
-      const prog = Math.min(100, Math.max(0, Math.round((y + 9.8) / 19.6 * 100)));
-      if (prog > this.fortschritt) {
-        this.fortschritt = prog;
-      }
-      if (y > 170 && !this.postenAbgeschlossen) {
+      this.fortschritt = Math.min(100, Math.max(0, Math.round(((y + 9.8) / 19.6) * 100)));
+      if (y > 8 && !this.postenAbgeschlossen) {
         this.abschliessen();
       }
     });
@@ -123,6 +102,19 @@ readonly onOrientation = (event: DeviceOrientationEvent): void => {
       : `🥔 Kartoffel! Du hast ${this.timer}s gebraucht.`;
     this.gameService.recordResult(4, { schnitzel, kartoffel, skipped: false, timeSeconds: this.timer });
     Haptics.impact({ style: ImpactStyle.Medium });
+  }
+
+  postenWiederholen(): void {
+    window.removeEventListener('devicemotion', this.onMotion);
+    clearInterval(this.interval);
+    this.gameService.clearResult(4);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.fortschritt = 0;
+    this.sensorAktiv = false;
+    this.startSensor();
   }
 
   postenUeberspringen(): void {

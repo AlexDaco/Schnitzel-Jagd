@@ -31,6 +31,7 @@ export class Posten3Page implements OnInit, OnDestroy {
   timerDisplay = '00:00';
   private interval: any;
   postenAbgeschlossen = false;
+  wasSkipped = false;
   scanFehler = '';
   hatSchnitzel = false;
   ergebnisText = '';
@@ -46,6 +47,7 @@ export class Posten3Page implements OnInit, OnDestroy {
       this.hatSchnitzel = done.schnitzel === 1;
       this.timer = done.timeSeconds;
       this.timerDisplay = this.formatTime(done.timeSeconds);
+      this.wasSkipped = done.skipped;
       this.ergebnisText = done.skipped
         ? '⏭️ Posten übersprungen.'
         : done.schnitzel === 1
@@ -53,9 +55,10 @@ export class Posten3Page implements OnInit, OnDestroy {
           : `🥔 Kartoffel. Deine Zeit: ${done.timeSeconds}s`;
       return;
     }
-
+    this.gameService.startPosten(3);
+    this.timer = this.gameService.getPostenElapsed(3);
     this.interval = setInterval(() => {
-      this.timer++;
+      this.timer = this.gameService.getPostenElapsed(3);
       this.timerDisplay = this.formatTime(this.timer);
     }, 1000);
   }
@@ -73,7 +76,7 @@ export class Posten3Page implements OnInit, OnDestroy {
         if (wert === EXPECTED_QR) {
           this.abschliessen();
         } else {
-          this.scanFehler = 'Falscher QR-Code. Bitte den richtigen scannen.';
+          this.scanFehler = 'Ups! Falscher QR-Code.';
         }
       }
     } catch (e) {
@@ -94,9 +97,24 @@ export class Posten3Page implements OnInit, OnDestroy {
     Haptics.impact({ style: ImpactStyle.Medium });
   }
 
+  postenWiederholen(): void {
+    this.gameService.clearResult(3);
+    this.postenAbgeschlossen = false;
+    this.wasSkipped = false;
+    this.ergebnisText = '';
+    this.hatSchnitzel = false;
+    this.scanFehler = '';
+    this.timer = this.gameService.getPostenElapsed(3);
+    this.timerDisplay = this.formatTime(this.timer);
+    this.interval = setInterval(() => {
+      this.timer = this.gameService.getPostenElapsed(3);
+      this.timerDisplay = this.formatTime(this.timer);
+    }, 1000);
+  }
+
   postenUeberspringen(): void {
     clearInterval(this.interval);
-    this.gameService.recordResult(3, { schnitzel: 0, kartoffel: 0, skipped: true, timeSeconds: this.timer });
+    this.gameService.recordResult(3, { schnitzel: 0, kartoffel: 1, skipped: true, timeSeconds: this.timer });
     this.router.navigate(['/posten']);
   }
 
